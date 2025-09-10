@@ -1,0 +1,523 @@
+# %%
+import os
+import subprocess
+import numpy as np
+import matplotlib.pyplot as plt
+
+os.environ["USER"] = subprocess.check_output("whoami", shell=True).decode()
+from omfit_classes.omfit_mars import OMFITmars
+
+from spline_utils import fourier_coefs_half, fourier_coefs_full
+
+# %%
+rundir_mars = (
+   "/proj/plasma/DATA/DEMO/teams/MARSQ_OUTPUTS/DATA_equil_qmod/"
+   "MARSQ_OUTPUTS_100kAt_dBkinetic_NTVkinetic_NEO2profs/"
+)
+
+data = OMFITmars(rundir_mars)
+data.load()
+
+# %%
+
+R0 = np.array(data["sim0"]["R0EXP"])
+B0 = np.array(data["sim0"]["B0EXP"])
+
+data.get_RZ()
+
+Nm = data["sim0"]["Nm0"].values.astype(int)
+Nchi = data["sim0"]["Nchi"].values.astype(int)
+rho_pol_data = data["sim0"]["s"].values  # plasma region until s=1, continuation for s>1.
+
+m = np.arange(Nm)
+chi = np.linspace(-np.pi, np.pi, Nchi)
+
+R = data["sim0"]["R"]
+Z = data["sim0"]["Z"]
+
+R = R * R0
+Z = Z * R0
+
+fig, ax = plt.subplots()
+ax.plot(R[rho_pol_data<=1.1], Z[rho_pol_data<=1.1], ",")
+ax.set_aspect("equal")
+ax.set_xlabel("R [m]")
+ax.set_ylabel("Z [m]")
+
+# %%
+
+# %% Spline R in 2D with the chi coordinate periodic
+
+from scipy.interpolate import CubicSpline
+
+RM = data["sim0"]["RM"].values * R0
+ZM = data["sim0"]["ZM"].values * R0
+
+interp_RM = CubicSpline(rho_pol_data, RM)
+interp_ZM = CubicSpline(rho_pol_data, ZM)
+
+rho_plot = np.linspace(0, 1.0, 1000)
+
+plt.figure()
+plt.plot(rho_pol_data, RM[:, 0], "x")
+plt.plot(rho_plot, interp_RM(rho_plot)[:, 0], "-")
+plt.xlabel("s")
+plt.ylabel("Rm [m]")
+
+
+# %% Evaluate R and Z
+def interp_RZ(rho_pol, chi):
+    expfac = np.exp(1.0j * np.outer(m, chi))
+    return np.real(interp_RM(rho_pol).dot(expfac)), \
+           np.real(interp_ZM(rho_pol).dot(expfac))
+
+
+Rplot = np.zeros((len(rho_plot), len(chi)))
+Zplot = np.zeros((len(rho_plot), len(chi)))
+
+for i, sval in enumerate(rho_plot):
+    Rplot[i, :], Zplot[i, :] = interp_RZ(sval, chi)
+
+plt.figure()
+plt.plot(Rplot.flatten(), Zplot.flatten(), ",")
+plt.xlabel("R [m]")
+plt.ylabel("Z [m]")
+plt.axis("equal")
+
+# %% Interpolate equilibrium field
+import os
+from scipy.io import loadmat
+from scipy.interpolate import RectBivariateSpline
+
+basedir_mars = "/proj/plasma/DATA/DEMO/teams/MARSQ_OUTPUTS/DATA_equil_qmod/"
+data_B0_mars = loadmat(os.path.join(basedir_mars, "B_EQUIL_RECTRZ_MARSQ.mat"))
+
+bord = 50  # Border from rectangular boundary to interpolate
+
+
+def interp2d(f):
+    return RectBivariateSpline(
+        data_B0_mars["r"][bord:-bord, 0],
+        data_B0_mars["z"][0, bord:-bord],
+        f[bord:-bord, bord:-bord],
+        kx=3,
+        ky=3,
+        s=1e-4,
+    )
+
+
+interp_B0r = interp2d(data_B0_mars["Br"])
+interp_B0z = interp2d(data_B0_mars["Bz"])
+interp_B0phi = interp2d(data_B0_mars["Bphi"])
+
+
+interp_B0 = lambda r, z, grid=True: np.sqrt(
+    interp_B0r(r, z, grid=grid) ** 2
+    + interp_B0z(r, z, grid=grid) ** 2
+    + interp_B0phi(r, z, grid=grid) ** 2
+)
+
+B0plot = interp_B0(Rplot, Zplot, grid=False)
+
+Rbound, Zbound = interp_RZ(1.0, chi)
+
+plt.figure()
+plt.contourf(Rplot, Zplot, B0plot)
+plt.plot(Rbound, Zbound, "k")
+plt.xlabel("R [m]")
+plt.ylabel("Z [m]")
+plt.axis("equal")
+plt.title("Interpolation based on RZ grid of B0 [T]")
+plt.colorbar()
+
+# %% Now interpolate in s-chi coordinates Spline/Fourier
+
+def compute_fourier_coefs_RZ(interp_f):
+    fm = np.zeros((len(rho_plot), Nm), dtype=complex)
+    for i, rho in enumerate(rho_plot):
+        r, z = interp_RZ(rho, chi[:-1])
+        f = interp_f(r, z, grid=False)
+        fm[i, :] = fourier_coefs_half(f, chi, m)
+
+    return fm
+
+
+def fourier_and_spline_RZ(interp_f):
+    fm = compute_fourier_coefs_RZ(interp_f)
+    fm_spl = []
+    for i in range(fm.shape[1]):
+        fm_spl.append(CubicSpline(rho_plot, fm[:, i]))
+    return fm_spl
+
+
+B0m_spl = fourier_and_spline_RZ(interp_B0)
+B0rm_spl = fourier_and_spline_RZ(interp_B0r)
+B0zm_spl = fourier_and_spline_RZ(interp_B0z)
+B0phim_spl = fourier_and_spline_RZ(interp_B0phi)
+
+
+def interp_f_flux(f_spl, s, ch):
+    f = np.zeros_like(s, dtype=complex)
+    for i in range(Nm):
+        f += f_spl[i](s) * np.exp(1.0j * m[i] * ch)
+    return np.real(f)
+
+
+def interp_B0_flux(s, chi):
+    return np.array((
+        interp_f_flux(B0rm_spl, s, chi),
+        interp_f_flux(B0zm_spl, s, chi),
+        interp_f_flux(B0phim_spl, s, chi)
+    )).T
+
+
+def interp_B0mod_flux(s, chi):
+    return interp_f_flux(B0m_spl, s, chi)
+
+
+def interp_dB0_flux(s, chi):
+    dB0ds = np.zeros_like(s, dtype=complex)
+    dB0dchi = np.zeros_like(s, dtype=complex)
+    for i in range(Nm):
+        dB0ds += B0m_spl[i](s, 1) * np.exp(1.0j * m[i] * chi)
+        dB0dchi += 1.0j * m[i] * B0m_spl[i](s) * np.exp(1.0j * m[i] * chi)
+    return np.real(dB0ds), np.real(dB0dchi)
+
+
+# %% Test that the interpolation is correct
+
+plt.figure()
+plt.plot(rho_plot, interp_B0mod_flux(rho_plot, chi[67]))
+plt.plot(rho_plot, B0plot[:, 67], "--")
+plt.xlabel("s")
+plt.ylabel("B0 [T]")
+plt.legend(["s/chi", "R/Z"])
+
+plt.figure()
+plt.plot(chi, [interp_B0mod_flux(rho_plot[50], chi_i) for chi_i in chi])
+plt.plot(chi, B0plot[50, :], "--")
+plt.xlabel("chi")
+plt.ylabel("B0 [T]")
+plt.legend(["s/chi", "R/Z"])
+
+dB0ds_plot, _ = interp_dB0_flux(rho_plot, chi[67])
+dB0ds_test_plot = np.diff(B0plot[:, 67]) / np.diff(rho_plot)
+
+plt.figure()
+plt.plot(rho_plot, dB0ds_plot)
+plt.plot(rho_plot[:-1] + 0.5 * (rho_plot[1] - rho_plot[0]), dB0ds_test_plot, "--")
+plt.xlabel("s")
+plt.ylabel("dB0/ds [T/m]")
+
+dB0dchi_plot = [interp_dB0_flux(rho_plot[50], chi_i)[1] for chi_i in chi]
+dB0dchi_test_plot = np.diff(B0plot[50, :]) / np.diff(chi)
+
+plt.figure()
+plt.plot(chi, dB0dchi_plot)
+plt.plot(chi[:-1] + 0.5 * (chi[1] - chi[0]), dB0dchi_test_plot, "--")
+plt.xlabel("chi")
+plt.ylabel("dB0/dchi [T/rad]")
+
+# %% Test that the interpolation is correct
+ks = 100
+kchi = 67
+
+assert np.allclose(
+    B0plot[:, kchi], interp_B0mod_flux(rho_plot, chi[kchi]), rtol=1e-3)
+
+dB0_eval = interp_dB0_flux(rho_plot[ks], chi[kchi])
+
+ds_test = rho_plot[ks+1] - rho_plot[ks-1]
+dchi_test = chi[kchi+1] - chi[kchi-1]
+dB0ds_test = (B0plot[ks+1, kchi] - B0plot[ks-1, kchi]) / ds_test
+dB0dchi_test = (B0plot[ks, kchi+1] - B0plot[ks, kchi-1]) / dchi_test
+
+assert np.allclose(dB0ds_test, dB0_eval[0], rtol=1e-5)
+assert np.allclose(dB0dchi_test, dB0_eval[1], rtol=1e-4)
+
+# %% Get displacements
+
+sx = data["XPLASMA"].sp.values
+assert np.allclose(sx, rho_pol_data[rho_pol_data<=1])
+mx = data["XPLASMA"].Mm.values
+
+# Givs arrays of shape [len(sx), len(mx)]
+XM1 = data["XPLASMA"]["XM1"].values
+XM2 = data["XPLASMA"]["XM2"].values
+XM3 = data["XPLASMA"]["XM3"].values
+
+plt.figure()
+plt.semilogy(mx, np.abs(XM1[50, :]), "o")
+plt.semilogy(mx, np.abs(XM2[50, :]), "x")
+plt.semilogy(mx, np.abs(XM3[50, :]), "s")
+plt.xlabel("Poloidal Fourier mode m")
+plt.ylabel("Fourier coefficient of displacement")
+plt.legend(["XM1", "XM2", "XM3"])
+
+# %% Now interpolate displacement Xi in s-chi coordinates Spline/Fourier
+
+# Get the Jacobian
+Ns1 = len(sx)
+data.get_UnitVec()
+J = data["UnitVector"]["Jacobian"].isel(s=range(Ns1)).values
+
+JM = np.empty((len(sx), len(mx)), dtype=complex)
+for i in range(len(sx)):
+    JM[i, :] = fourier_coefs_full(J[i][:-1], chi, mx)
+
+# Spline each Fourier coefficient over s
+XM1_spl = []
+XM2_spl = []
+XM3_spl = []
+JM_spl = []
+for i in range(XM1.shape[1]):
+    XM1_spl.append(CubicSpline(sx, XM1[:, i]))
+    XM2_spl.append(CubicSpline(sx, XM2[:, i]))
+    XM3_spl.append(CubicSpline(sx, XM3[:, i]))
+    JM_spl.append(CubicSpline(sx, JM[:, i]))
+
+
+def interp_XM(s, chi):
+    if isinstance(s, (int, float)):
+        ns = 1
+    else:
+        ns = len(s)
+    XMval = np.zeros([ns, 3], dtype=complex)
+    JMval = np.zeros(ns, dtype=complex)
+
+    for i in range(len(mx)):
+        expfac = np.exp(1.0j * mx[i] * chi)
+        XMval[:,0] += XM1_spl[i](s) * expfac
+        XMval[:,1] += XM2_spl[i](s) * expfac
+        XMval[:,2] += XM3_spl[i](s) * expfac
+        JMval += JM_spl[i](s) * expfac
+
+    for i in range(3):
+        XMval[:,i] /= JMval
+
+    return XMval
+
+# %% Evaluate the perturbation in B due to the displacement and plot
+
+def dB0(spol, chi, phi, n=1):
+    if isinstance(spol, (int, float)):
+        ns = 1
+    else:
+        ns = len(spol)
+    XM = np.zeros([ns, 3], dtype=complex)
+
+    s = np.sqrt(np.abs(spol))  #  MARSQ uses sqrt(spol) = sqrt(psi/psi_a)
+    expfac = np.exp(1.0j * n * phi)
+    expfac_conj = np.exp(-1.0j * n * phi)
+
+    XMN = interp_XM(s, chi)
+    XM[:,0] = expfac * XMN[:,0] + expfac_conj * np.conj(XMN[:,0])
+    XM[:,1] = expfac * XMN[:,1] + expfac_conj * np.conj(XMN[:,0])
+    XM[:,2] = expfac * XMN[:,2] + expfac_conj * np.conj(XMN[:,0])
+
+    dBds, dBdchi = interp_dB0_flux(s, chi)
+    return np.real(dBds*XM[:,0] + dBdchi*XM[:,1])  # TODO: WRONG. X1 is not chi
+
+
+plt.figure()
+plt.semilogy(rho_plot, dB0(rho_plot, chi[0], 0.0))
+plt.semilogy(rho_plot, dB0(rho_plot, chi[0], 1.0))
+plt.semilogy(rho_plot, dB0(rho_plot, chi[90], 0.0))
+plt.semilogy(rho_plot, dB0(rho_plot, chi[150], 0.0))
+plt.xlabel("s")
+plt.ylabel("dB0 [T]")
+plt.legend(["chi[0]", "chi[0]", "chi[90]", "chi[150]"])
+
+# %% Get the local (Eulerian) B-field perturbation from MARS
+data.get_Bcyl()
+
+B1r = B0*data["BPLASMA"]["Br"].values[:,:-1]
+B1z = B0*data["BPLASMA"]["Bz"].values[:,:-1]
+B1phi = B0*data["BPLASMA"]["Bphi"].values[:,:-1]
+
+
+interp_B1r = CubicSpline(rho_pol_data, B1r)
+interp_B1z = CubicSpline(rho_pol_data, B1z)
+interp_B1phi = CubicSpline(rho_pol_data, B1phi)
+
+#%%
+mfull = np.arange(-Nm+1, Nm)
+
+def compute_fourier_coefs_flux(interp_f):
+    fm = np.zeros((len(rho_plot), 2*Nm-1), dtype=complex)
+    for i, sval in enumerate(rho_plot):
+        fm[i, :] = fourier_coefs_full(interp_f(sval), chi, mfull)
+
+    return fm
+
+
+def fourier_and_spline_flux(interp_f):
+    fm = compute_fourier_coefs_flux(interp_f)
+    fm_spl = []
+    for i in range(2*Nm-1):
+        fm_spl.append(CubicSpline(rho_plot, fm[:, i]))
+    return fm_spl
+
+
+B1rm_spl = fourier_and_spline_flux(interp_B1r)
+B1zm_spl = fourier_and_spline_flux(interp_B1z)
+B1phim_spl = fourier_and_spline_flux(interp_B1phi)
+
+
+def interp_B1m(s, chi):
+    if isinstance(s, (int, float)):
+        ns = 1
+    else:
+        ns = len(s)
+    B1val = np.zeros([ns, 3], dtype=complex)
+
+    for i in range(2*Nm-1):
+        expfac = np.exp(1.0j * mfull[i] * chi)
+        B1val[:,0] += B1rm_spl[i](s) * expfac
+        B1val[:,1] += B1zm_spl[i](s) * expfac
+        B1val[:,2] += B1phim_spl[i](s) * expfac
+    return B1val
+
+
+def B1(spol, chi, phi, n=1):
+    if isinstance(spol, (int, float)):
+        ns = 1
+    else:
+        ns = len(spol)
+
+    B1ret = np.zeros([ns, 3], dtype=complex)
+
+    s = np.sqrt(np.abs(spol))  # s in MARSQ is sqrt(spol) = sqrt(psi/psi_a)
+    B1m = interp_B1m(s, chi)
+    expfac = np.exp(1.0j * n * phi)
+
+    B1ret[:,0] = np.real(expfac * B1m[:,0])
+    B1ret[:,1] = np.real(expfac * B1m[:,1])
+    B1ret[:,2] = np.real(expfac * B1m[:,2])
+
+    return np.real(B1ret)
+
+
+
+kchi = 100
+s_test = np.linspace(rho_plot[0], rho_plot[-1], 123)
+chi_test = chi[kchi]*np.ones(len(s_test))
+
+B1rm_test = interp_B1m(s_test, chi_test)[:,0]
+
+plt.figure()
+plt.plot(s_test, B1rm_test.real)
+plt.plot(rho_pol_data, B1r[:,kchi].real, "x")
+plt.xlabel("s")
+plt.ylabel("Re B1R [T]")
+plt.legend(["splined", "original"])
+plt.xlim(0.0, 1.1)
+
+plt.figure()
+plt.plot(s_test, B1rm_test.imag)
+plt.plot(rho_pol_data, B1r[:,kchi].imag, "x")
+plt.xlabel("s")
+plt.ylabel("Im B1R [T]")
+plt.legend(["splined", "original"])
+plt.xlim(0.0, 1.1)
+
+
+#%%
+
+def dB1(spol, chi, phi, n=1):
+    rho = np.sqrt(np.abs(spol))  # MARSQ uses rho=sqrt(spol) = sqrt(psi/psi_a)
+    B1val = B1(rho, chi, phi, n)
+    B0val = interp_B0_flux(rho, chi)
+    B1pert = np.zeros(len(rho))
+    for i in range(len(rho)):
+        B1pert[i] = B0val[i,:].dot(B1val[i,:])/np.sqrt(np.sum(B0val[i,:]**2))
+
+    return B1pert
+
+def dB(spol, chi, phi, n=1, use_b1=True):
+    B0pert = dB0(spol, chi, phi, n)
+    if not use_b1:
+        return B0pert
+
+    return B0pert + dB1(spol, chi, phi, n)
+
+print(
+    dB(np.array([0.5,0.6]), np.array([0.5,0.6]), np.array([0.5,0.6]),
+    use_b1=False))
+print(dB(np.array([0.5,0.6]), np.array([0.5,0.6]), np.array([0.5,0.6])))
+
+
+
+#%%
+rho_plot = np.linspace(0, 1.0, 100)
+
+kchi = 0
+
+B1plot = B1(rho_plot, chi[kchi]*np.ones(len(rho_plot)), np.zeros(len(rho_plot)))
+B0plot = interp_B0_flux(rho_plot, chi[kchi]*np.ones(len(rho_plot)))
+B1pert = np.zeros(len(rho_plot))
+for i in range(len(rho_plot)):
+    B1pert[i] = B0plot[i,:].dot(B1plot[i,:])/np.sqrt(np.sum(B0plot[i,:]**2))
+
+fig, ax = plt.subplots()
+ax.semilogy(rho_plot, np.abs(B0plot[:,0]), label="B0R")
+ax.semilogy(rho_plot, np.abs(B0plot[:,1]), label="B0Z")
+ax.semilogy(rho_plot, np.abs(B0plot[:,2]), label="B0phi")
+ax.set_xlabel("s")
+ax.set_ylabel("B0 [T]")
+ax.legend()
+
+fig, ax = plt.subplots()
+ax.semilogy(rho_plot, np.abs(B1plot[:,0]), label="B1R")
+ax.semilogy(rho_plot, np.abs(B1plot[:,1]), label="B1Z")
+ax.semilogy(rho_plot, np.abs(B1plot[:,2]), label="B1phi")
+ax.semilogy(rho_plot, np.abs(B1pert), "-.", label="B1pert")
+ax.semilogy(rho_plot, np.abs(dB0(rho_plot, chi[kchi], 0.0)), "--", label="dB0")
+ax.set_xlabel("s")
+ax.set_ylabel("B1 [T]")
+ax.legend()
+
+# %% Chi equal arc depending on geometric theta
+def theta_geom(r, z):
+    return np.arctan2(z - Z[0, 0].values*np.ones_like(z),
+                      r - R[0, 0].values*np.ones_like(r))
+
+def theta_geom_flux(s, ch):
+    r, z = interp_RZ(s, ch)
+    return np.array([theta_geom(r[k], z[k]) for k in range(len(r))])
+
+dchi_m = np.zeros((len(rho_plot), Nm), dtype=complex)
+for i, rho in enumerate(rho_plot[1:]):
+    theta = theta_geom_flux(rho, chi)
+    dchi = np.unwrap(np.mod(chi - theta - np.pi, 2*np.pi) - np.pi)
+    dchi_m[i, :] = fourier_coefs_half(dchi[1:], theta, m)
+
+dchi_m_spl = []
+for i in range(dchi_m.shape[1]):
+    dchi_m_spl.append(CubicSpline(rho_plot, dchi_m[:, i]))
+
+def chi_eqarc_of_theta(spol, theta):
+    return theta + interp_f_flux(dchi_m_spl, spol, theta)
+
+# %%
+s_test = 0.9
+theta_test = np.linspace(-np.pi, np.pi, 200)
+
+chi_test = np.array([chi_eqarc_of_theta(s_test, th) for th in theta_test])
+
+r_ref, z_ref = interp_RZ(s_test, chi)
+theta_ref = theta_geom(r_ref, z_ref)
+
+plt.figure()
+plt.plot(theta_ref, chi, 'x')
+plt.plot(theta_test, chi_test)
+# %%
+s_test = np.linspace(0, 1, 200)
+theta_test = 0.3
+
+chi_test = np.array([chi_eqarc_of_theta(si, theta_test) for si in s_test])
+
+plt.figure()
+plt.plot(s_test, chi_test)
+
+# %%
