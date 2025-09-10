@@ -37,17 +37,17 @@ params["pres"] = {
 # params["geometry"] = gvec.util.read_parameters(
 # "/Users/josefreiterer/Desktop/Bachelor-Thesis/coding/workshop-material/mars/modes2.toml")
 
-params["X1_b_cos"] = {(0, 0): 9.057,
-                      (1, 0): -2.48,
+params["X1_b_cos"] = {(0, 0): 9.06,
+                      (1, 0): -1.28,
                       }
 
 params["X2_b_sin"] = {(0, 0): 0,
-                      (1, 0): -3.15,
+                      (1, 0): -3.14,
                       }
 params["X1_b_sin"] = {(0, 0): 0,
-                      (1, 0): -0.05, }
+                      (1, 0): 0.035, }
 params["X2_b_cos"] = {(0, 0): 0.09,
-                      (1, 0): -0.03, }
+                      (1, 0): -1.04, }
 
 params["init_average_axis"] = True
 runpath = Path("test_run")
