@@ -38,22 +38,22 @@ params["pres"] = {
 # "/Users/josefreiterer/Desktop/Bachelor-Thesis/coding/workshop-material/mars/modes2.toml")
 
 params["X1_b_cos"] = {(0, 0): 9.057,
-                      (1, 0): -1.27,
+                      (1, 0): -0.6,
                       (2, 0): 0.042,
 
                       }
 params["X2_b_cos"] = {(0, 0): 0.09,
-                      (1, 0): -0.02,
-                      (2, 0): 0.01,
+                      (1, 0): 0.4,
+                      (2, 0): -2e-4,
 
                       }
 
 params["X1_b_sin"] = {(0, 0): 0,
-                      (1, 0): 0.024,
-                      (2, 0): 0.0024}
+                      (1, 0): 0.016,
+                      (2, 0): 0.0015}
 params["X2_b_sin"] = {(0, 0): 0,
-                      (1, 0): -3.11,
-                      (2, 0): -0.023, }
+                      (1, 0): -1.46,
+                      (2, 0): -0.01, }
 
 
 params["init_average_axis"] = True
