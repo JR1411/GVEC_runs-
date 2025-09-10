@@ -13,9 +13,9 @@ params["ProjectName"] = "test_run"
 params["PhiEdge"] = -276
 params["which_hmap"] = 1
 params["nfp"] = 1
-params["X1_mn_max"] = [3, 3]
-params["X2_mn_max"] = [3, 3]
-params["LA_mn_max"] = [3, 3]
+params["X1_mn_max"] = [3, 1]
+params["X2_mn_max"] = [3, 1]
+params["LA_mn_max"] = [3, 1]
 params["sgrid_nelems"] = 5
 params["X1X2_deg"] = 3
 params["LA_deg"] = 3
@@ -38,23 +38,16 @@ params["pres"] = {
 # "/Users/josefreiterer/Desktop/Bachelor-Thesis/coding/workshop-material/mars/modes2.toml")
 
 params["X1_b_cos"] = {(0, 0): 9.057,
-                      (1, 0): -0.6,
-                      (2, 0): 0.042,
-
-                      }
-params["X2_b_cos"] = {(0, 0): 0.09,
-                      (1, 0): 0.4,
-                      (2, 0): -2e-4,
-
+                      (1, 0): -2.48,
                       }
 
-params["X1_b_sin"] = {(0, 0): 0,
-                      (1, 0): 0.016,
-                      (2, 0): 0.0015}
 params["X2_b_sin"] = {(0, 0): 0,
-                      (1, 0): -1.46,
-                      (2, 0): -0.01, }
-
+                      (1, 0): -3.15,
+                      }
+params["X1_b_sin"] = {(0, 0): 0,
+                      (1, 0): -0.05, }
+params["X2_b_cos"] = {(0, 0): 0.09,
+                      (1, 0): -0.03, }
 
 params["init_average_axis"] = True
 runpath = Path("test_run")
