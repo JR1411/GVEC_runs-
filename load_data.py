@@ -4,7 +4,7 @@ from omfit_classes.omfit_mars import OMFITmars
 import numpy as np
 import matplotlib.pyplot as plt
 import xarray as xr
-from scipy.fft import fft2, fft
+from scipy.fft import fft2, fft, ifft
 
 
 rundir = "/Users/josefreiterer/Desktop/Bachelor-Thesis/coding/workshop-material/KINETIC_KNTV=20_newOMEGAW/"
@@ -124,15 +124,16 @@ def plot_Xwarp_1(self, rsurf, phi=np.linspace(0, 2 * np.pi, 200),   fig=None, wi
 
 
 def reconstruct(data, type: str):
-    theta = np.linspace(0, 2 * np.pi, len(data))
-    a = (data[0] / 2) + np.zeros(len(data))
+    theta = np.linspace(0, 2 * np.pi, 200, endpoint=False)
+    # a = (data[0] / 2) + np.zeros(len(data))
+    a = np.zeros(len(data))
     if type == "cos":
-        for m in range(1, len(data)):
+        for m in range(len(data)):
             a += data[m] * np.cos(m * theta)
 
     if type == "sin":
-        for m in range(1, len(data)):
-            a += - data[m] * np.sin(m * theta)
+        for m in range(len(data)):
+            a += data[m] * np.sin(m * theta)
 
     return a
 
