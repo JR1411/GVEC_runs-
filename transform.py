@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from load_data import R_2d, Z_2d
-from scipy.fft import fft2
+from load_data import R_2d, R_array, R_total, Z_2d, Z_array, Z_total, reconstruct
+from scipy.fft import fft2, fft
 
 
 def fft_to_cos_sin(R_fft):
@@ -23,3 +23,20 @@ def fft_to_cos_sin(R_fft):
         a[N//2] = R_fft[N//2].real
 
     return a, b
+
+
+R_fft = fft(R_2d) / len(R_2d.T)
+Z_fft = fft(Z_2d) / len(Z_2d.T)
+
+R_cos, R_sin = fft_to_cos_sin(R_fft[0])
+Z_cos, Z_sin = fft_to_cos_sin(Z_fft[0])
+
+R_rec = reconstruct(R_cos, "cos") + reconstruct(R_sin, "sin")
+Z_rec = reconstruct(Z_cos, "cos") + reconstruct(Z_sin, "sin")
+
+print(R_sin[3:6], Z_sin[3:6])
+
+exit()
+plt.plot(R_rec, Z_rec)
+plt.axis("equal")
+plt.show()

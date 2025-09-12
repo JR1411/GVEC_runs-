@@ -13,9 +13,9 @@ params["ProjectName"] = "test_run"
 params["PhiEdge"] = -276
 params["which_hmap"] = 1
 params["nfp"] = 1
-params["X1_mn_max"] = [3, 1]
-params["X2_mn_max"] = [3, 1]
-params["LA_mn_max"] = [3, 1]
+params["X1_mn_max"] = [5, 1]
+params["X2_mn_max"] = [5, 1]
+params["LA_mn_max"] = [5, 1]
 params["sgrid_nelems"] = 5
 params["X1X2_deg"] = 3
 params["LA_deg"] = 3
@@ -36,18 +36,30 @@ params["pres"] = {
 
 # params["geometry"] = gvec.util.read_parameters(
 # "/Users/josefreiterer/Desktop/Bachelor-Thesis/coding/workshop-material/mars/modes2.toml")
-
-params["X1_b_cos"] = {(0, 0): 9.06,
-                      (1, 0): -1.28,
-                      }
-
-params["X2_b_sin"] = {(0, 0): 0,
-                      (1, 0): -3.14,
-                      }
-params["X1_b_sin"] = {(0, 0): 0,
-                      (1, 0): 0.035, }
+params["X1_b_cos"] = {(0, 0): 9.057,
+                      (1, 0): -2.207,
+                      (2, 0): 0.084,
+                      (3, 0): 0.1,
+                      (4, 0): 0.02,
+                      (5, 0): -0.01}
 params["X2_b_cos"] = {(0, 0): 0.09,
-                      (1, 0): -1.04, }
+                      (1, 0): -0.03,
+                      (2, 0): 0.003,
+                      (3, 0): 0.005,
+                      (4, 0): -0.0012,
+                      (5, 0): -0.0028, }
+params["X1_b_sin"] = {(0, 0): 0,
+                      (1, 0): 0.05,
+                      (2, 0): 0.005,
+                      (3, 0): 0.002,
+                      (4, 0): -0.00096,
+                      (5, 0): 0.001, }
+params["X2_b_sin"] = {(0, 0): 0,
+                      (1, 0): -2.92,
+                      (2, 0): -0.02,
+                      (3, 0): 0.135,
+                      (4, 0): 0.038,
+                      (5, 0): -0.01, }
 
 params["init_average_axis"] = True
 runpath = Path("test_run")
@@ -73,7 +85,8 @@ rho_vis = R*0 + ev.rho
 vis_lvl = np.linspace(0, 1, 10)
 
 fig, ax = plt.subplots()
-ax.contourf(R, Z, rho_vis, vis_lvl, cmap="viridis")
+ax.contourf(R, Z, rho_vis, vis_lvl, cmap="plasma")
 ax.axis("equal")
+ax.set(xlabel="R", ylabel="Z")
 plt.savefig("boundary_test.jpeg")
 plt.show()

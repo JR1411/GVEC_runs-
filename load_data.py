@@ -138,7 +138,7 @@ def reconstruct(data, type: str):
     return a
 
 
-phi_angle = np.array(np.real(np.exp(-1j * phi)))
+phi_angle = np.array(np.real(np.exp(-1j * phi))) * R0
 R_array = np.array(R_total[-1, :])
 
 R_2d = np.array([[R_array], [phi_angle]]).reshape(2, 200)

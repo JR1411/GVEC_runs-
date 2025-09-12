@@ -1,5 +1,5 @@
 ====================================================================================================================================
-%%% Sys date : 2025-09-11 00:15:59
+%%% Sys date : 2025-09-12 20:57:44
 ====================================================================================================================================
 *    - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -   *
 *   - - - - - - - - - - - - GGGGGGGGGGGGGGG - VVVVVVVV  - - - -  VVVVVVVV - EEEEEEEEEEEEEEEEEEEEEE  - - - - CCCCCCCCCCCCCCC - -    *
@@ -100,16 +100,16 @@ INIT MHD3D ...
  |            getBoundaryFromFile |                                -1 | DEFAULT | 
  |                       X1X2_deg |                                 3 | *CUSTOM | 
  |                X1X2_continuity |                                 2 | DEFAULT | 
- |                      X1_mn_max |      Integer array of size (   2) | *CUSTOM |     3    1
- |                      X2_mn_max |      Integer array of size (   2) | *CUSTOM |     3    1
+ |                      X1_mn_max |      Integer array of size (   2) | *CUSTOM |     5    1
+ |                      X2_mn_max |      Integer array of size (   2) | *CUSTOM |     5    1
  |                     X1_sin_cos |                             _cos_ | DEFAULT | 
  |                     X2_sin_cos |                             _sin_ | DEFAULT | 
  |                         LA_deg |                                 3 | *CUSTOM | 
  |                  LA_continuity |                                 2 | DEFAULT | 
- |                      LA_mn_max |      Integer array of size (   2) | *CUSTOM |     3    1
+ |                      LA_mn_max |      Integer array of size (   2) | *CUSTOM |     5    1
  |                     LA_sin_cos |                             _sin_ | DEFAULT | 
 
-    fac_nyq =    4  ==> interpolation points mn_nyq=(     13 ,      5 )
+    fac_nyq =    4  ==> interpolation points mn_nyq=(     21 ,      5 )
 
  |                sgrid_grid_type |                                 0 | DEFAULT | 
  |                          degGP |                                 5 | DEFAULT | 
@@ -118,7 +118,7 @@ INIT MHD3D ...
     ... DONE
     INIT sBase type: degree=   3 gauss points per elem =   5 continuity=   2 ...
     ... DONE
-    INIT fBase type: mn_max= (     3 ,      1 ), mn_nyq =     13 ,      5 )
+    INIT fBase type: mn_max= (     5 ,      1 ), mn_nyq =     21 ,      5 )
       nfp    =    1 exclude_mn_zero =  F ,  sin/cos : _cos_ ...
     ... DONE
  |              init_average_axis |                                 T | *CUSTOM | 
@@ -127,10 +127,18 @@ INIT MHD3D ...
     ... read axis data for X1:
     ... read axis data for X2:
     ... read edge boundary data for X1:
- |                  X1_b_cos(0;0) |                       0.90600E+01 | *CUSTOM | 
- |                  X1_b_cos(1;0) |                      -0.12800E+01 | *CUSTOM | 
+ |                  X1_b_cos(0;0) |                       0.90570E+01 | *CUSTOM | 
+ |                  X1_b_cos(1;0) |                      -0.22070E+01 | *CUSTOM | 
+ |                  X1_b_cos(2;0) |                       0.84000E-01 | *CUSTOM | 
+ |                  X1_b_cos(3;0) |                       0.10000E+00 | *CUSTOM | 
+ |                  X1_b_cos(4;0) |                       0.20000E-01 | *CUSTOM | 
+ |                  X1_b_cos(5;0) |                      -0.10000E-01 | *CUSTOM | 
     ... read edge boundary data for X2:
- |                  X2_b_sin(1;0) |                      -0.31400E+01 | *CUSTOM | 
+ |                  X2_b_sin(1;0) |                      -0.29200E+01 | *CUSTOM | 
+ |                  X2_b_sin(2;0) |                      -0.20000E-01 | *CUSTOM | 
+ |                  X2_b_sin(3;0) |                       0.13500E+00 | *CUSTOM | 
+ |                  X2_b_sin(4;0) |                       0.38000E-01 | *CUSTOM | 
+ |                  X2_b_sin(5;0) |                      -0.10000E-01 | *CUSTOM | 
  |               boundary_perturb |                                 F | DEFAULT | 
 INIT MHD3D_EVALFUNC...
 ... DONE
@@ -139,11 +147,19 @@ INIT MHD3D_EVALFUNC...
 ====================================================================================================================================
 ------------------------------------------------------------------------------------------------------------------------------------
  THE FOLLOWING INI-FILE PARAMETERS WERE IGNORED:
- |- x2_b_sin(0;0)=0
- |- x1_b_sin(0;0)=0
- |- x1_b_sin(1;0)=0.035
  |- x2_b_cos(0;0)=0.09
- |- x2_b_cos(1;0)=-1.04
+ |- x2_b_cos(1;0)=-0.03
+ |- x2_b_cos(2;0)=0.003
+ |- x2_b_cos(3;0)=0.005
+ |- x2_b_cos(4;0)=-0.0012
+ |- x2_b_cos(5;0)=-0.0028
+ |- x1_b_sin(0;0)=0
+ |- x1_b_sin(1;0)=0.05
+ |- x1_b_sin(2;0)=0.005
+ |- x1_b_sin(3;0)=0.002
+ |- x1_b_sin(4;0)=-0.00096
+ |- x1_b_sin(5;0)=0.001
+ |- x2_b_sin(0;0)=0
 ------------------------------------------------------------------------------------------------------------------------------------
     INITIALIZE SOLUTION...
                            ...
@@ -152,35 +168,34 @@ INIT MHD3D_EVALFUNC...
     |....................................................................................................| [    0.00 sec ]
      init lambda took [      0.00 sec]
    WRITE SOLUTION VARIABLE TO FILE    "test_run_State_0000_00000000.dat" ... ......DONE.
-        |Force|=  0.1069E-01 0.2648E-01 0.1489E-05
+        |Force|=  0.8622E-02 0.1063E-01 0.2973E-03
     ...DONE
 ====================================================================================================================================
  INITIALIZATION FINISHED! [    0.01 sec ]
 ====================================================================================================================================
 MINIMIZE MHD3D FUNCTIONAL...
 %%%%%%%%%%  START ITERATION, dt=  0.1000E+00  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Sys date : 2025-09-11 00:15:59
-%%% dU = |Force|=  0.10685321991000E-01 0.26478228273544E-01 0.14885073604939E-05
+%%% Sys date : 2025-09-12 20:57:44
+%%% dU = |Force|=  0.86217379031199E-02 0.10634896092145E-01 0.29729815275273E-03
 %%% accel.GD: tau=  0.7500E-01 |vel|=  0.0000E+00 0.0000E+00 0.0000E+00
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
-              16...deltaW> 0.1E-09*W_MHD3D_0, skip step and decrease stepsize to dt= 0.9000E-01
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Sys date : 2025-09-11 00:16:02
-%%% #ITERATIONS=     1434, #skippedIter (Jac/dW)=        0       0
-%%% t_pseudo=  0.1292E+03, min/max dt=  0.9000E-01 0.9000E-01
-%%% W_MHD3D=  0.17346929802698E+06, min/max/sum deltaW=  -0.3618E-01 -0.3460E-07 -0.4113E+01
-%%% dU = |Force|=  0.58762747625003E-06 0.47419189523734E-06 0.99969675203011E-06
-%%% accel.GD: tau=  0.2178E-02 |vel|=  0.4758E-05 0.9045E-05 0.8311E-05
-%%% axis position (X1,X2,zeta=0     ):   0.90919210019658E+01  0.00000000000000E+00
-%%% axis position (X1,X2,zeta=pi/nfp):   0.90919210019658E+01 -0.41121524036006E-30
+%%% Sys date : 2025-09-12 20:57:49
+%%% #ITERATIONS=     2265, #skippedIter (Jac/dW)=        0       0
+%%% t_pseudo=  0.2265E+03, min/max dt=  0.1000E+00 0.1000E+00
+%%% W_MHD3D=  0.10676725910131E+06, min/max/sum deltaW=  -0.2149E+00 -0.6125E-06 -0.2054E+02
+%%% dU = |Force|=  0.87767985571510E-06 0.99943954596411E-06 0.79795444395426E-06
+%%% accel.GD: tau=  0.1311E-02 |vel|=  0.4481E-04 0.5168E-04 0.3634E-04
+%%% axis position (X1,X2,zeta=0     ):   0.92035069327636E+01  0.00000000000000E+00
+%%% axis position (X1,X2,zeta=pi/nfp):   0.92035069327636E+01  0.17527285278012E-30
  - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
     ==>Iteration finished, |force| in relative tolerance
 ... DONE.
 ====================================================================================================================================
-   WRITE SOLUTION VARIABLE TO FILE    "test_run_State_0000_00001434.dat" ... ......DONE.
- FUNCTIONAL MINIMISATION FINISHED! [    2.86 sec ], corresponding to [    0.29 msec/iteration ]
+   WRITE SOLUTION VARIABLE TO FILE    "test_run_State_0000_00002265.dat" ... ......DONE.
+ FUNCTIONAL MINIMISATION FINISHED! [    4.42 sec ], corresponding to [    0.44 msec/iteration ]
 ====================================================================================================================================
-%%% Sys date : 2025-09-11 00:16:02
+%%% Sys date : 2025-09-12 20:57:49
 ====================================================================================================================================
- GVEC SUCESSFULLY FINISHED! [    2.86 sec ]
+ GVEC SUCESSFULLY FINISHED! [    4.42 sec ]
 ====================================================================================================================================
