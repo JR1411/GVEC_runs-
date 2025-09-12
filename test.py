@@ -33,7 +33,6 @@ params["pres"] = {
     "vals": [0.8, 0.738125, 0.652500, 0.343125, 0.1],
     "scale": 1e6,
 }
-
 # params["geometry"] = gvec.util.read_parameters(
 # "/Users/josefreiterer/Desktop/Bachelor-Thesis/coding/workshop-material/mars/modes2.toml")
 params["X1_b_cos"] = {(0, 0): 9.057,
@@ -82,7 +81,8 @@ rho_vals = [0.1, 0.25, 0.05, 0.75, 1.0]
 
 rho_vis = R*0 + ev.rho
 
-vis_lvl = np.linspace(0, 1, 10)
+vis_lvl = np.linspace(0, 1 - 1e-10, 15)
+
 
 fig, ax = plt.subplots()
 ax.contourf(R, Z, rho_vis, vis_lvl, cmap="plasma")
