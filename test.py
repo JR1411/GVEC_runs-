@@ -40,25 +40,29 @@ params["X1_b_cos"] = {(0, 0): 9.057,
                       (2, 0): 0.084,
                       (3, 0): 0.1,
                       (4, 0): 0.02,
-                      (5, 0): -0.01}
+                      (5, 0): -0.01,
+                      }
 params["X2_b_cos"] = {(0, 0): 0.09,
                       (1, 0): -0.03,
                       (2, 0): 0.003,
                       (3, 0): 0.005,
                       (4, 0): -0.0012,
-                      (5, 0): -0.0028, }
+                      (5, 0): -0.0028,
+                      }
 params["X1_b_sin"] = {(0, 0): 0,
                       (1, 0): 0.05,
                       (2, 0): 0.005,
                       (3, 0): 0.002,
                       (4, 0): -0.00096,
-                      (5, 0): 0.001, }
+                      (5, 0): 0.001,
+                      }
 params["X2_b_sin"] = {(0, 0): 0,
                       (1, 0): -2.92,
                       (2, 0): -0.02,
                       (3, 0): 0.135,
                       (4, 0): 0.038,
-                      (5, 0): -0.01, }
+                      (5, 0): -0.01,
+                      }
 
 params["init_average_axis"] = True
 runpath = Path("test_run")
@@ -88,5 +92,4 @@ fig, ax = plt.subplots()
 ax.contourf(R, Z, rho_vis, vis_lvl, cmap="plasma")
 ax.axis("equal")
 ax.set(xlabel="R", ylabel="Z")
-plt.savefig("boundary_test.jpeg")
 plt.show()

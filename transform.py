@@ -34,12 +34,15 @@ Z_cos, Z_sin = fft_to_cos_sin(Z_fft[0])
 theta_R_cos, theta_R_sin = fft_to_cos_sin(R_fft[1])
 theta_Z_cos, theta_Z_sin = fft_to_cos_sin(Z_fft[1])
 
+print(theta_Z_cos[1], theta_Z_sin[1])
 
-R_rec = reconstruct(R_cos, "cos") + reconstruct(R_sin, "sin")
-Z_rec = reconstruct(Z_cos, "cos") + reconstruct(Z_sin, "sin")
+R_rec = reconstruct(R_cos, "cos") + \
+    reconstruct(R_sin, "sin")
+Z_rec = reconstruct(Z_cos, "cos") + \
+    reconstruct(Z_sin, "sin")
 
-print(theta_R_cos[0:3], theta_R_sin[0:3])
 exit()
+plt.plot(R_2d[0], Z_2d[0])
 plt.plot(R_rec, Z_rec)
 plt.axis("equal")
 plt.show()
