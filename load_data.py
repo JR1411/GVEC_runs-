@@ -27,8 +27,8 @@ Z = R0 * Z
 
 chi = mars["sim0"]["chi"]
 
-R_flat = R[rho_values <= 1.0][-1, :]
-Z_flat = Z[rho_values <= 1.0][-1, :]
+R_flat = R[rho_values <= 0.8][-1, :]
+Z_flat = Z[rho_values <= 0.8][-1, :]
 
 
 def Test_fourier(data, theta):
@@ -64,10 +64,22 @@ Xz[0:2, :] = Xz[2, :]
 Xphi = mars['XPLASMA']['X3'].values * R0
 Xphi[0:2, :] = Xphi[2, :]
 
-phi = np.linspace(0, 2 * np.pi, 200)
+phi = np.linspace(0, 2 * np.pi, 20, endpoint=False)
 
-R_total = R[rho_values <= 0.8] + (np.real(Xr))
-Z_total = Z[rho_values <= 0.8] + (np.real(Xz))
+R_total = R[rho_values <= 0.8, :] + \
+    np.real(Xr[-1, :])
+Z_total = Z[rho_values <= 0.8, :] + \
+    np.real(Xz[-1, :])
+
+Xr_flat = Xr[-1, :]
+Xz_flat = Xz[-1, :]
+
+one_array = np.ones(len(phi))
+
+R_array = np.outer(R_flat, one_array) + \
+    np.real(np.outer(Xr_flat, np.exp(-1j * phi)))
+
+Z_array = np.outer(Z_flat, one_array) + np.outer(Xz_flat, np.exp(-1j * phi))
 
 
 def plot_Xwarp_1(self, rsurf, phi=np.linspace(0, 2 * np.pi, 200),   fig=None, with_arrows=False):
@@ -138,10 +150,8 @@ def reconstruct(data, type: str):
     return a
 
 
-phi_angle = np.array(np.real(np.exp(-1j * phi))) * R0
-R_array = np.array(R_total[-1, :])
-
-R_2d = np.array([[R_array], [phi_angle]]).reshape(2, 200)
-
-Z_array = np.array(Z_total[-1, :])
-Z_2d = np.array([[Z_array], [phi_angle]]).reshape(2, 200)
+exit()
+plt.plot(R_total[-1, :], Z_total[-1, :])
+plt.plot(R_array, Z_array, "r--")
+plt.axis("equal")
+plt.show()
