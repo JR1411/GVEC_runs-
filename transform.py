@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+from numpy.fft import fft2
 from load_data import R_array, R_total, Z_array, Z_total, reconstruct
 
 
@@ -92,8 +93,9 @@ R_rec = reconstruct(R_cos_mn, "cos") + \
 Z_rec = reconstruct(Z_cos_mn, "cos") + \
     reconstruct(Z_sin_mn, "sin")
 
-print(R_rec)
-plt.plot(R_array, Z_array)
-plt.plot(R_rec, Z_rec, "r--")
-plt.axis("equal")
+
+fig, ax = plt.subplots()
+
+ax.plot(R_rec, Z_rec, "r--")
+ax.axis("equal")
 plt.show()
