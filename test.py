@@ -89,23 +89,4 @@ zeta = np.linspace(0, 2*np.pi, 25)
 ev = state.evaluate("X1", "X2", "LA", "p", "iota", "pos",
                     rho=rho, theta=theta, zeta=zeta)
 
-R = ev.X1[:, :, 0]
-Z = ev.X2[:, :, 0]
-
-rho_vals = [0.1, 0.25, 0.05, 0.75, 1.0]
-
-rho_vis = R*0 + ev.rho
-
-vis_lvl = np.linspace(0, 1 - 1e-10, 5)
-
-ev1 = ev.sel(zeta=np.pi / 2, method="nearest")
-ev2 = ev.sel(zeta=np.pi, method="nearest")
-
-fig, ax = plt.subplots()
-
-ax.contour(R, Z, rho_vis, vis_lvl, colors="black")
-ax.contour(ev1.X1, ev1.X2, rho_vis, vis_lvl, colors="red")
-ax.contour(ev2.X1, ev2.X2, rho_vis, vis_lvl, colors="green")
-ax.axis("equal")
-ax.set(xlabel="R", ylabel="Z")
-plt.show()
+ev_axis = state.evaluate("pos", theta=[0.0], rho=[1e-8], zeta=zeta)
