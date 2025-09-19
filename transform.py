@@ -72,7 +72,7 @@ def fourier_coefs_half(f, theta, phi, m, n):
 
 
 m_max = 50
-n_max = 1
+n_max = 2
 R_cos_mn = np.zeros((m_max, n_max))
 R_sin_mn = np.zeros((m_max, n_max))
 Z_cos_mn = np.zeros((m_max, n_max))
@@ -87,6 +87,10 @@ for m in range(m_max):
         R_sin_mn[m, n] = Rs
         Z_cos_mn[m, n] = Zc
         Z_sin_mn[m, n] = Zs
+
+print(Z_cos_mn[0:5])
+
+exit()
 
 R_rec = reconstruct(R_cos_mn, "cos") + \
     reconstruct(R_sin_mn, "sin")

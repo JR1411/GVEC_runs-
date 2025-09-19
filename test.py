@@ -33,36 +33,47 @@ params["pres"] = {
     "vals": [0.8, 0.738125, 0.652500, 0.343125, 0.1],
     "scale": 1e6,
 }
-# params["geometry"] = gvec.util.read_parameters(
-# "/Users/josefreiterer/Desktop/Bachelor-Thesis/coding/workshop-material/mars/modes2.toml")
-params["X1_b_cos"] = {(0, 0): 9.057,
-                      (1, 0): -2.207,
-                      (2, 0): 0.084,
-                      (3, 0): 0.1,
-                      (4, 0): 0.02,
-                      (5, 0): -0.01,
-                      }
-params["X2_b_cos"] = {(0, 0): 0.09,
-                      (1, 0): -0.03,
-                      (2, 0): 0.003,
-                      (3, 0): 0.005,
-                      (4, 0): -0.0012,
-                      (5, 0): -0.0028,
-                      }
+
+params["X1_b_cos"] = {(0, 0): 9.58,
+                      (1, 0): -2.2457,
+                      (2, 0): 0.1525,
+                      (3, 0): 0.383,
+                      (4, 0): 0.09,
+                      (0, 1): 0.479,
+                      (1, 1): -0.112,
+                      (2, 1): 7.8e-3,
+                      (3, 1): 8.75e-3,
+                      (4, 1): 4.55e-3, }
 params["X1_b_sin"] = {(0, 0): 0,
-                      (1, 0): 0.05,
-                      (2, 0): 0.005,
-                      (3, 0): 0.002,
-                      (4, 0): -0.00096,
-                      (5, 0): 0.001,
-                      }
+                      (1, 0): 0.016,
+                      (2, 0): 0.0077,
+                      (3, 0): 0.008,
+                      (4, 0): 0.0004,
+                      (0, 1): -2.17e-4,
+                      (1, 1): 7.96e-4,
+                      (2, 1): 8.93e-4,
+                      (3, 1): -1.12e-4,
+                      (4, 1): -6.31e-5, }
 params["X2_b_sin"] = {(0, 0): 0,
-                      (1, 0): -2.92,
-                      (2, 0): -0.02,
-                      (3, 0): 0.135,
-                      (4, 0): 0.038,
-                      (5, 0): -0.01,
-                      }
+                      (1, 0): -3.08,
+                      (2, 0): -4.497e-2,
+                      (3, 0): 0.13,
+                      (4, 0): 3.4e-2,
+                      (0, 1): 1.92e-7,
+                      (1, 1): -1.54e-1,
+                      (2, 1): -2.25e-3,
+                      (3, 1): -6.56e-4,
+                      (4, 1): 1.72e-3, }
+params["X2_b_cos"] = {(0, 0): 0.09,
+                      (1, 0): 0.0117,
+                      (2, 0): 0.005,
+                      (3, 0): -0.00067,
+                      (4, 0): 0.00285,
+                      (0, 1): 4.87e-3,
+                      (1, 1): 6.02e-4,
+                      (2, 1): 2.67e-4,
+                      (3, 1): -3.35e-5,
+                      (4, 1): -1.42e-4, }
 
 params["init_average_axis"] = True
 runpath = Path("test_run")
@@ -85,11 +96,16 @@ rho_vals = [0.1, 0.25, 0.05, 0.75, 1.0]
 
 rho_vis = R*0 + ev.rho
 
-vis_lvl = np.linspace(0, 1 - 1e-10, 15)
+vis_lvl = np.linspace(0, 1 - 1e-10, 5)
 
+ev1 = ev.sel(zeta=np.pi / 2, method="nearest")
+ev2 = ev.sel(zeta=np.pi, method="nearest")
 
 fig, ax = plt.subplots()
-ax.contourf(R, Z, rho_vis, vis_lvl, cmap="plasma")
+
+ax.contour(R, Z, rho_vis, vis_lvl, colors="black")
+ax.contour(ev1.X1, ev1.X2, rho_vis, vis_lvl, colors="red")
+ax.contour(ev2.X1, ev2.X2, rho_vis, vis_lvl, colors="green")
 ax.axis("equal")
 ax.set(xlabel="R", ylabel="Z")
 plt.show()
