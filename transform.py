@@ -89,15 +89,13 @@ for m in range(m_max):
         Z_sin_mn[m, n] = Zs
 
 
+print(Z_sin_mn[0:5])
 exit()
-
 R_rec = reconstruct(R_cos_mn, "cos") + \
     reconstruct(R_sin_mn, "sin")
 Z_rec = reconstruct(Z_cos_mn, "cos") + \
     reconstruct(Z_sin_mn, "sin")
 
-
-print(R_cos_mn[0:5])
 
 fig, ax = plt.subplots()
 
