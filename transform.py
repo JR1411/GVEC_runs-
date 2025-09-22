@@ -4,49 +4,6 @@ from numpy.fft import fft2
 from load_data import R_array, R_total, Z_array, Z_total, reconstruct
 
 
-def fft_to_cos_sin(R_fft):
-    """ Zerlegt komplexe FFT-Koeffizienten in reelle Cos-/Sin-Koeffizienten """
-    N = len(R_fft)
-    a = np.zeros(N)
-    b = np.zeros(N)
-
-    # DC-Anteil
-    a[0] = R_fft[0].real
-
-    # für 1 <= m < N/2: Koeffizientenpaare
-    for m in range(1, N//2):
-        a[m] = 2 * R_fft[m].real
-        b[m] = -2 * R_fft[m].imag   # Vorzeichen wegen exp(i*mθ)
-
-    # Nyquist (falls gerade N)
-    if N % 2 == 0:
-        a[N//2] = R_fft[N//2].real
-
-    return a, b
-
-
-def fft2_theta_phi(f):
-
-    Ntheta, Nphi = f.shape
-
-    # standard FFT in both directions
-    F = np.fft.fft2(f) / (Ntheta * Nphi)
-
-    # index arrays
-    m = np.fft.fftfreq(Ntheta, 1/Ntheta).astype(int)  # theta index
-    n = np.fft.fftfreq(Nphi,   1/Nphi).astype(int)    # phi index
-
-    # flip the phi axis (because basis is -n*phi instead of +n*phi)
-    F = np.roll(F[:, ::-1], 1, axis=1)
-    n = -n
-
-    # cosine and sine parts
-    cos_modes = np.real(F)
-    sin_modes = -np.imag(F)
-
-    return m, n, cos_modes, sin_modes
-
-
 def fourier_coefs_half(f, theta, phi, m, n):
     dtheta = np.diff(theta)[0]
     dphi = np.diff(phi)[0]
@@ -78,7 +35,7 @@ R_sin_mn = np.zeros((m_max, n_max))
 Z_cos_mn = np.zeros((m_max, n_max))
 Z_sin_mn = np.zeros((m_max, n_max))
 theta = np.linspace(0, 2*np.pi, 200, endpoint=False)
-phi = np.linspace(0, 2*np.pi, 20, endpoint=False)
+phi = np.linspace(0, 2*np.pi, 20)
 for m in range(m_max):
     for n in range(n_max):
         Rc, Rs = fourier_coefs_half(R_array, theta, phi, m, n)
