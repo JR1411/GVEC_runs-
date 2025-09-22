@@ -72,7 +72,7 @@ Z_array = np.outer(Z_flat, one_array) + np.outer(Xz_flat, np.exp(-1j * phi))
 
 
 def reconstruct(data, type: str):
-    theta = np.linspace(0, 2 * np.pi, 50, endpoint=False)
+    theta = np.linspace(0, 2 * np.pi, 50)
     # a = (data[0] / 2) + np.zeros(len(data))
     a = np.zeros(len(data))
     if type == "cos":

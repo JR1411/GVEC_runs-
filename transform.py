@@ -77,8 +77,8 @@ R_cos_mn = np.zeros((m_max, n_max))
 R_sin_mn = np.zeros((m_max, n_max))
 Z_cos_mn = np.zeros((m_max, n_max))
 Z_sin_mn = np.zeros((m_max, n_max))
-theta = np.linspace(0, 2*np.pi, 200)
-phi = np.linspace(0, 2*np.pi, 20)
+theta = np.linspace(0, 2*np.pi, 200, endpoint=False)
+phi = np.linspace(0, 2*np.pi, 20, endpoint=False)
 for m in range(m_max):
     for n in range(n_max):
         Rc, Rs = fourier_coefs_half(R_array, theta, phi, m, n)
@@ -88,7 +88,6 @@ for m in range(m_max):
         Z_cos_mn[m, n] = Zc
         Z_sin_mn[m, n] = Zs
 
-print(Z_cos_mn[0:5])
 
 exit()
 
@@ -97,6 +96,8 @@ R_rec = reconstruct(R_cos_mn, "cos") + \
 Z_rec = reconstruct(Z_cos_mn, "cos") + \
     reconstruct(Z_sin_mn, "sin")
 
+
+print(R_cos_mn[0:5])
 
 fig, ax = plt.subplots()
 
