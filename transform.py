@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy.fft import fft2
 from load_data import R_array, R_total, Z_array, Z_total, reconstruct
+import tomli_w
 
 
 def fourier_coefs_half(f, theta, phi, m, n):
@@ -46,7 +47,38 @@ for m in range(m_max):
         Z_sin_mn[m, n] = Zs
 
 
-print(Z_sin_mn[0:5])
+def array_to_lines(arr, n):
+    """
+    Convert array into TOML lines with '(m,n) = value,' format,
+    keeping *all* coefficients (including zeros).
+    """
+    lines = []
+    for m, val in enumerate(arr):
+        lines.append(f"({m},{n}) : {float(val)},")
+    return lines
+
+
+# Build coefficient lines
+R_cos_lines = array_to_lines(
+    R_cos_mn.T[0, :], 0) + array_to_lines(R_cos_mn.T[1, :].T, 1)
+Z_cos_lines = array_to_lines(
+    Z_cos_mn.T[0, :].T, 0) + array_to_lines(Z_cos_mn.T[1, :].T, 1)
+R_sin_lines = array_to_lines(
+    R_sin_mn.T[0, :].T, 0) + array_to_lines(R_sin_mn.T[1, :].T, 1)
+Z_sin_lines = array_to_lines(
+    Z_sin_mn.T[0, :].T, 0) + array_to_lines(Z_sin_mn.T[1, :].T, 1)
+
+# Write to geometry.toml manually
+with open("geometry.toml", "w") as f:
+    f.write("[X1_b_cos]\n")
+    f.write("\n".join(R_cos_lines) + "\n\n")
+    f.write("[X1_b_sin]\n")
+    f.write("\n".join(R_sin_lines) + "\n\n")
+    f.write("[X2_b_cos]\n")
+    f.write("\n".join(Z_cos_lines) + "\n\n")
+    f.write("[X2_b_sin]\n")
+    f.write("\n".join(Z_sin_lines) + "\n")
+
 exit()
 R_rec = reconstruct(R_cos_mn, "cos") + \
     reconstruct(R_sin_mn, "sin")
