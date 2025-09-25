@@ -450,3 +450,10 @@ ev = state.evaluate("X1", "X2", "LA", "p", "iota", "pos",
                     rho=rho, theta=theta, zeta=zeta)
 
 ev_axis = state.evaluate("pos", theta=[0.0], rho=[1e-8], zeta=zeta)
+
+fig, ax = plt.subplots()
+
+ax.plot(ev.X1[:, :, 0][::3].T, ev.X2[:, :, 0][::3].T, "r--")
+ax.axis("equal")
+ax.set(xlabel="R", ylabel="Z")
+plt.show()
