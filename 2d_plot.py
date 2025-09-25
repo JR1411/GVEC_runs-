@@ -18,6 +18,6 @@ ax.contour(R, Z, rho_vis, vis_lvl, colors="black")
 ax.contour(ev_2.X1, ev_2.X2, rho_vis, vis_lvl, colors="red", alpha=0.5)
 ax.contour(ev_3.X1, ev_3.X2, rho_vis, vis_lvl, colors="green", alpha=0.5)
 ax.axis("equal")
-ax.set(xlabel="R", ylabel="Z",
+ax.set(xlabel="R [m]", ylabel="Z [m]",
        title=r"black : $\zeta$ = 0 , red : $\zeta$ = $\pi / 2 $ , green : $\zeta$ = $\pi  $ ")
 plt.show()

@@ -55,10 +55,6 @@ Xphi[0:2, :] = Xphi[2, :]
 
 phi = np.linspace(0, 2 * np.pi, 20, endpoint=False)
 
-R_total = R[rho_values <= 0.8, :] + \
-    np.real(Xr[-1, :])
-Z_total = Z[rho_values <= 0.8, :] + \
-    np.real(Xz[-1, :])
 
 Xr_flat = Xr[-1, :]
 Xz_flat = Xz[-1, :]

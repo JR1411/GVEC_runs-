@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy.fft import fft2
-from load_data import R_array, R_total, Z_array, Z_total, reconstruct
+from load_data import R_array, Z_array, reconstruct
 import tomli_w
 
 
@@ -36,7 +36,7 @@ R_sin_mn = np.zeros((m_max, n_max))
 Z_cos_mn = np.zeros((m_max, n_max))
 Z_sin_mn = np.zeros((m_max, n_max))
 theta = np.linspace(0, 2*np.pi, 200, endpoint=False)
-phi = np.linspace(0, 2*np.pi, 20)
+phi = np.linspace(0, 2*np.pi, 20, endpoint=False)
 for m in range(m_max):
     for n in range(n_max):
         Rc, Rs = fourier_coefs_half(R_array, theta, phi, m, n)
@@ -79,15 +79,19 @@ with open("geometry.toml", "w") as f:
     f.write("[X2_b_sin]\n")
     f.write("\n".join(Z_sin_lines) + "\n")
 
-exit()
-R_rec = reconstruct(R_cos_mn, "cos") + \
-    reconstruct(R_sin_mn, "sin")
-Z_rec = reconstruct(Z_cos_mn, "cos") + \
-    reconstruct(Z_sin_mn, "sin")
+R_rec = reconstruct(R_cos_mn.T[1], "cos") + \
+    reconstruct(R_sin_mn.T[1], "sin")
+Z_rec = reconstruct(Z_cos_mn.T[1], "cos") + \
+    reconstruct(Z_sin_mn.T[1], "sin")
+R_rec_2 = reconstruct(R_cos_mn.T[0], "cos") + \
+    reconstruct(R_sin_mn.T[0], "sin")
+
+Z_rec_2 = reconstruct(Z_cos_mn.T[0], "cos") + \
+    reconstruct(Z_sin_mn.T[0], "sin")
 
 
 fig, ax = plt.subplots()
 
 ax.plot(R_rec, Z_rec, "r--")
+ax.plot(R_rec_2, Z_rec_2, "b--")
 ax.axis("equal")
-plt.show()
