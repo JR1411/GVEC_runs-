@@ -111,9 +111,6 @@ for m in range(m_max):
 
 
 def array_to_dict(arr):
-    """
-    Convert a 2D numpy array into a dictionary with tuple keys (i, j).
-    """
     nx, ny = arr.shape
     return {(i, j): arr[i, j] for i in range(nx) for j in range(ny)}
 
@@ -162,7 +159,7 @@ params["X2_b_sin"] = Z_sin_dict
 params["init_average_axis"] = True
 
 runpath = Path("final_run")
-run = gvec.run(params, runpath=runpath)
+run = gvec.run(params, runpath=runpath, keep_intermediates="all")
 
 state = run.state
 
