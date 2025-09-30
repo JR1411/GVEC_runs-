@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import setuptools as distutils
 from omfit_classes.omfit_mars import OMFITmars
 
-rundir = "/Users/josefreiterer/Desktop/Bachelor-Thesis/coding/workshop-material/data_albert/data-demo_vmec-DEMO-MARS-DEMO_2024_NTV-OUTPUT_KINETIC/DEMO/MARS/DEMO_2024_NTV/OUTPUT_KINETIC/"
+rundir = "/Users/josefreiterer/Desktop/Bachelor-Thesis/coding/workshop-material/KINETIC_KNTV=20_newOMEGAW/p0/"
 
 data = OMFITmars(rundir)
 
@@ -22,7 +22,7 @@ Z = data["sim0"]["Z"].values
 R = R*R0
 Z = Z*R0
 
-last_flux_surf = 0.95
+last_flux_surf = 0.8
 rho_idx = rho_vals <= last_flux_surf
 
 R = R[rho_idx]
